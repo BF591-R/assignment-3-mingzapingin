@@ -17,6 +17,7 @@ if (!require("BiocManager", quietly = TRUE)){
 if (!require("biomaRt", quietly = TRUE)){
   BiocManager::install("biomaRt")
 }
+
 suppressPackageStartupMessages(library(biomaRt))
 suppressPackageStartupMessages(library(tidyverse))
 
@@ -35,7 +36,8 @@ suppressPackageStartupMessages(library(tidyverse))
 #' @examples 
 #' `data <- load_expression('/project/bf528/project_1/data/example_intensity_data.csv')`
 load_expression <- function(filepath) {
-    return(NULL)
+    expression <- read_csv(filepath)
+    return(expression)
 }
 
 #' Filter 15% of the gene expression values.
@@ -51,7 +53,14 @@ load_expression <- function(filepath) {
 #' `tibble [40,158 × 1] (S3: tbl_df/tbl/data.frame)`
 #' `$ probe: chr [1:40158] "1007_s_at" "1053_at" "117_at" "121_at" ...`
 filter_15 <- function(tibble){
-    return(NULL)
+    num_data_columns <- ncol(tibble) - 1
+    affymatrix <- tibble %>%
+      mutate(
+        Above = rowSums(across(-probe, ~ .x > log2(15))) / num_data_columns *100
+      ) %>%
+      filter(Above > 15) %>%
+      select(probe)
+    return(affymatrix)
 }
 
 #### Gene name conversion ####
@@ -79,6 +88,14 @@ filter_15 <- function(tibble){
 #' `4        1553551_s_at      MT-ND2`
 #' `5           202860_at     DENND4B`
 affy_to_hgnc <- function(affy_vector) {
+    BiocManager::install("hgu133plus2.db")
+    human_mart <- useEnsembl(
+                        biomart = "ENSEMBL_MART_ENSEMBL",
+                        dataset = "hsapiens_gene_ensembl"
+                        ,host = "useast.ensembl.org"
+                        )
+    getBM(c("affy_hg_u133_plus_2", "hgnc_symbol"))
+
     return(NULL)
 }
 

@@ -5,7 +5,7 @@ library(testthat)
 
 describe("load_expression()", {
   result_tib <- load_expression('data/example_intensity_data_subset.csv')
-  
+  # print(class(result_tib))
   it("returns a tibble, not a dataframe", {
     expect_true(is_tibble(result_tib))
   })
@@ -24,6 +24,8 @@ describe("filter_15()", {
                      GSM6=rep(1.0, 4),
                      GSM7=rep(0.5, 4))
   
+  print(test_tib)
+  print(filter_15(test_tib))
   it("correctly filters the rows meeting the specified criteria", {
     expect_equal(c(filter_15(test_tib)$probe), c("2_s_at", "3_s_at"))
   })
