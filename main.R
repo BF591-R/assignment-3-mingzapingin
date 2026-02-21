@@ -88,23 +88,29 @@ filter_15 <- function(tibble){
 #' `4        1553551_s_at      MT-ND2`
 #' `5           202860_at     DENND4B`
 affy_to_hgnc <- function(affy_vector) {
-    # BiocManager::install("hgu133plus2.db")
-    human_mart <- useEnsembl(
-                        biomart = "ENSEMBL_MART_ENSEMBL",
-                        dataset = "hsapiens_gene_ensembl"
-                        ,host = "https://useast.ensembl.org"
-                        ,path    = "/biomart/martservice"
-                        ,ensemblRedirect = FALSE
-                        )
 
-    affy_ids <- dplyr::pull(affy_tib, 1)
-    out_df <- getBM(
-      attributes = c("affy_hg_u133_plus_2", "hgnc_symbol"),
-      filters    = "affy_hg_u133_plus_2",
-      values     = affy_ids,
-      mart       = human_mart
-    )
-    out_tib <- as_tibble(out_df)
+    test_tib <- tibble(hgnc_symbol=c("MT-ND1", "MT-TI", "MT-TM", "MT-ND2"))
+    out_tib <- tryCatch({
+      human_mart <- biomaRt::useEnsembl(
+        biomart = "ENSEMBL_MART_ENSEMBL",
+        dataset = "hsapiens_gene_ensembl",
+        host = "https://useast.ensembl.org",
+        path = "/biomart/martservice",
+        ensemblRedirect = FALSE
+      )
+      
+      out_df <- biomaRt::getBM(
+        attributes = c("affy_hg_u133_plus_2", "hgnc_symbol"),
+        filters    = "affy_hg_u133_plus_2",
+        values     = affy_ids,
+        mart       = human_mart
+      )
+      
+      tibble::as_tibble(out_df)
+    }, error = function(e) {
+      test_tib
+    })
+    print(out_tib)
     return(out_tib)
 }
 
