@@ -88,15 +88,24 @@ filter_15 <- function(tibble){
 #' `4        1553551_s_at      MT-ND2`
 #' `5           202860_at     DENND4B`
 affy_to_hgnc <- function(affy_vector) {
-    BiocManager::install("hgu133plus2.db")
+    # BiocManager::install("hgu133plus2.db")
     human_mart <- useEnsembl(
                         biomart = "ENSEMBL_MART_ENSEMBL",
                         dataset = "hsapiens_gene_ensembl"
-                        ,host = "useast.ensembl.org"
+                        ,host = "https://useast.ensembl.org"
+                        ,path    = "/biomart/martservice"
+                        ,ensemblRedirect = FALSE
                         )
-    getBM(c("affy_hg_u133_plus_2", "hgnc_symbol"))
 
-    return(NULL)
+    affy_ids <- dplyr::pull(affy_tib, 1)
+    out_df <- getBM(
+      attributes = c("affy_hg_u133_plus_2", "hgnc_symbol"),
+      filters    = "affy_hg_u133_plus_2",
+      values     = affy_ids,
+      mart       = human_mart
+    )
+    out_tib <- as_tibble(out_df)
+    return(out_tib)
 }
 
 #' Reduce a tibble of expression data to only the rows in good_genes or bad_genes.
@@ -129,7 +138,25 @@ affy_to_hgnc <- function(affy_vector) {
 #' `1 202860_at   DENND4B good        7.16      ...`
 #' `2 204340_at   TMEM187 good        6.40      ...`
 reduce_data <- function(expr_tibble, names_ids, good_genes, bad_genes){
-    return(NULL)
+    index <- match(expr_tibble$probe, names_ids$affy_hg_u133_plus_2)
+    expr_tibble <- add_column(
+      expr_tibble,
+      hgnc_symbol = names_ids$hgnc_symbol[index],
+      .after = "probe"
+    )
+    
+    expr_tibble <- add_column(
+      expr_tibble,
+      gene_set = NA,
+      .after = "hgnc_symbol"
+    )
+
+    expr_tibble$gene_set[which(expr_tibble$hgnc_symbol %in% good_genes)] <- 'good'
+    expr_tibble$gene_set[which(expr_tibble$hgnc_symbol %in% bad_genes)] <- 'bad'
+    
+    expr_tibble <- expr_tibble[!is.na(expr_tibble$gene_set), ]
+    print(expr_tibble)
+    return(expr_tibble)
 }
 
 #' Convert a wide format tibble to long for easy plotting
@@ -143,6 +170,12 @@ reduce_data <- function(expr_tibble, names_ids, good_genes, bad_genes){
 #'
 #' @examples
 convert_to_long <- function(tibble) {
-    return(NULL)
+    longer <- tibble %>%
+    pivot_longer(
+      cols = -c(1,2,3),
+      names_to = "sample",
+      values_to = "value"
+    )
+    return(longer)
 }
 

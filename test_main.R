@@ -69,7 +69,7 @@ describe("reduce_data()", {
                    GSM1 = c(9.5, 7.6),
                    GSM2 = c(9.7, 7.2),
                    GSM3 = c(6.9, 4.3))
-  
+  print(expected_result)
   it("returns a reduced tibble with the specified columns", {
     expect_equal(reduce_test, expected_result)
   })
