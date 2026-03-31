@@ -58,8 +58,8 @@ filter_15 <- function(tibble){
       mutate(
         Above = rowSums(across(-probe, ~ .x > log2(15))) / num_data_columns *100
       ) %>%
-      filter(Above > 15) %>%
-      select(probe)
+      dplyr::filter(Above > 15) %>%
+      dplyr::select(probe)
     return(affymatrix)
 }
 
