@@ -265,8 +265,34 @@ ggplot2 to construct a boxplot akin to the one you see in the
 reference_report.html. You do *not* need to do this in a function, use
 the space provided below to create this plot.
 
+```{r}
+# Use genes that actually exist in gene_names
+goodGenes <- c("MT-ND1", "MT-TI")
+badGenes  <- c("MT-TM", "MT-ND2")
+
+# Applying the function
+reduced_data <- reduce_data(result_tib, gene_names, goodGenes, badGenes)
+reduced_data
+```
+
 ```{r boxplot from long format data using ggplot2, echo=FALSE}
 library(ggplot2)
-
+ggplot(long_format_data, aes(x = hgnc_symbol, y = value, fill = gene_set)) +
+  geom_boxplot(outlier.shape = 21, outlier.size = 1.5, alpha = 0.85) +
+  scale_fill_manual(
+    values = c("good" = "#2196F3", "bad" = "#E53935"),
+    name = "Gene Category"
+  ) +
+  labs(
+    title = "Gene Expression Levels by Category",
+    x = "Gene",
+    y = "Expression Level (log2)"
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x  = element_text(angle = 45, hjust = 1, size = 9),
+    plot.title   = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "top"
+  )
 
 ```
